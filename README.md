@@ -1,6 +1,6 @@
 # Merls
 
-[![License](https://img.shields.io/pypi/l/merls)](https://github.com/fujiawei-dev/merls/blob/master/LICENSE)
+[![License](https://img.shields.io/pypi/l/merls)](https://github.com/fujiawei-dev/merls/blob/main/LICENSE)
 
 [![Python Test](https://github.com/fujiawei-dev/merls/actions/workflows/python-test.yml/badge.svg)](https://github.com/fujiawei-dev/merls/actions/workflows/python-test.yml)
 
