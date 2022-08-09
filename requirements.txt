@@ -1,0 +1,7 @@
+click~=8.0.4
+faker~=13.13.0
+pillow~=9.0.1
+pydantic[dotenv]~=1.9.0
+pyexiv2~=2.7.1
+pyyaml~=6.0
+toolkit-py>=1.4.0
