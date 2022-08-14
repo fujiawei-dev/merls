@@ -22,6 +22,9 @@ def organize_album_photos(
     prefix_with_brackets = f"[{options.photo_prefix}]" if options.photo_prefix else ""
 
     for album in Path(src).iterdir():
+        if album.name in ignore.skipped_files:
+            continue
+
         if not album.is_dir():
             log.warning(f"{album.name} is not a directory")
             continue

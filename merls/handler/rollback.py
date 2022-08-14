@@ -11,13 +11,19 @@ log = logging.getLogger(__name__)
 
 ROLLBACK_SEP = " -> "
 
+CURRENT_NUMBER = 1
+
 
 def get_rollback_logger(
     stem: str, folder: Path = rollback_folder
 ) -> Tuple[logging.Logger, Path]:
+    global CURRENT_NUMBER
+
     logger = log.getChild(stem)
 
-    filename = folder / f'{time.strftime("%Y%m%d%H%M%S")}_{stem}.log'
+    time_string = time.strftime("%Y%m%d%H%M%S")
+    filename = folder / f"{time_string}_{stem}_{CURRENT_NUMBER}.log"
+    CURRENT_NUMBER += 1
 
     file_handler = logging.FileHandler(
         filename=filename,
@@ -41,6 +47,7 @@ def unpack_rollback_record(record: str):
 
 
 def rollback_from_file(rollback_file: Union[str, Path]):
+    log.info(f"rollback from {rollback_file}")
     with open(rollback_file, encoding="utf-8") as fp:
         for record in fp.read().splitlines():
             if record:

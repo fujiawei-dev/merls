@@ -80,8 +80,8 @@ def organize_album_folders(
 
         current_number = latest_number + 1
 
-        match_no = re.search(r"NO\.(\d+)", album_name)
-        match_vol = re.search(r"VOL\.(\d+)", album_name)
+        match_no = re.search(r"NO\.(\d+)", album_name, flags=re.IGNORECASE)
+        match_vol = re.search(r"VOL\.(\d+)", album_name, flags=re.IGNORECASE)
         match_number = match_no or match_vol
 
         if match_number:

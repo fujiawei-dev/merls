@@ -1,13 +1,15 @@
 """Console script for merls."""
+import os
 import sys
 
 import click
+from cookiecutter.prompt import read_user_choice
 from toolkit.config.runtime import EDITOR
 from toolkit.config.serialize import serialize_to_yaml_file
 from toolkit.fs.dir import delete_empty_folder_including_itself
 
 from merls import __version__, handler
-from merls.config import DEFAULT_CONFIG_FILE
+from merls.config import DEFAULT_CONFIG_FILE, DEFAULT_ROLLBACK_DIR
 from merls.config.album_photo import get_album_photo_options
 from merls.config.settings import Settings
 from merls.entity.image import clear_images_exif_recursively
@@ -120,13 +122,34 @@ def cls(target_path):
     type=click.Path(exists=True, dir_okay=False, readable=True),
     help="The rollback file.",
 )
-def rv(rollback_file):
+@click.option(
+    "--open-explorer",
+    "-e",
+    is_flag=True,
+    help="Open the rollback folder in explorer.",
+)
+@click.option(
+    "--list-files",
+    "-l",
+    is_flag=True,
+    help="List the rollback files.",
+)
+def rv(rollback_file: str, open_explorer: bool, list_files: bool):
+    if open_explorer:
+        click.launch(str(DEFAULT_ROLLBACK_DIR), locate=True)
+        return
+
+    if list_files:
+        click.echo("\n".join(reversed(os.listdir(DEFAULT_ROLLBACK_DIR)[-20:])))
+        return
+
     if not rollback_file:
-        click.echo("Please specify the rollback file.")
-        rollback_file = click.prompt(
-            "Rollback file",
-            default=settings.rollback_file,
-            type=click.Path(exists=True, dir_okay=False, readable=True),
+        rollback_file = os.path.join(
+            DEFAULT_ROLLBACK_DIR,
+            read_user_choice(
+                "Please select a rollback file",
+                options=os.listdir(DEFAULT_ROLLBACK_DIR)[-20:],
+            ),
         )
 
     rollback.rollback_from_file(rollback_file)
@@ -144,13 +167,14 @@ def rv(rollback_file):
     "--destination-path",
     "-d",
     required=False,
+    default=settings.tidy_destination_path,
     type=click.Path(exists=True, file_okay=False, writable=True),
     help="The destination path.",
 )
 @click.option("--wallpapers", is_flag=True, help="Organize wallpapers.")
 @click.option("--album-folders", is_flag=True, help="Organize album folders.")
 @click.option("--album-photos", is_flag=True, help="Organize album photos.")
-@click.option("--default", is_flag=True, help="Default actions.")
+@click.option("--default", is_flag=True, default=True, help="Default actions.")
 def tidy(
     source_path: str,
     destination_path: str,
