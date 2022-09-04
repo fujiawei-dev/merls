@@ -15,6 +15,7 @@ class ExifTags(str, Enum):
     keywords = "Exif.Image.XPKeywords"
     subject = "Exif.Image.XPSubject"
     title = "Exif.Image.XPTitle"
+    copyright = "Exif.Image.Copyright"
 
 
 def clear_image_exif(path: Union[str, Path], title: str = "", author: str = ""):
@@ -26,6 +27,7 @@ def clear_image_exif(path: Union[str, Path], title: str = "", author: str = ""):
             "http" in value
             or "www" in value
             or ".com" in value
+            or ".top" in value
             or DOMAIN_PATTERN.match(value)
         ):
             exif[key] = ""

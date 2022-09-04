@@ -63,20 +63,23 @@ def organize_album_folders(
         if prefix_with_brackets == "" and album_name.startswith("["):
             album_name = album_name[album_name.find("]") + 1 :]
 
+        for alias in options.album_prefix_aliases:
+            album_name = album_name.replace("[" + alias + "]", "").replace(alias, "")
+
         for k, v in {
             options.album_prefix: "",
+            "[" + options.album_prefix + "]": "",
             "-": "",
+            "／": "",
             "）": ") ",
             "（": "(",
             "vol.": "VOL.",
             "Vol.": "VOL.",
             "no.": "NO.",
             "No.": "NO.",
+            "[]": "",
         }.items():
             album_name = album_name.replace(k, v)
-
-        for alias in options.album_prefix_aliases:
-            album_name = album_name.replace(alias, "").replace("[" + alias + "]", "")
 
         current_number = latest_number + 1
 
