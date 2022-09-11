@@ -1,6 +1,7 @@
 """Console script for merls."""
 import os
 import sys
+from pathlib import Path
 
 import click
 from cookiecutter.prompt import read_user_choice
@@ -175,6 +176,7 @@ def rv(rollback_file: str, open_explorer: bool, list_files: bool):
 @click.option("--album-folders", is_flag=True, help="Organize album folders.")
 @click.option("--album-photos", is_flag=True, help="Organize album photos.")
 @click.option("--default", is_flag=True, default=True, help="Default actions.")
+@click.option("--is-parent", "-p", is_flag=True, help="Search subdirectories.")
 def tidy(
     source_path: str,
     destination_path: str,
@@ -182,6 +184,7 @@ def tidy(
     album_folders: bool,
     album_photos: bool,
     default: bool,
+    is_parent: bool,
 ):
     if not source_path:
         click.echo("Please specify the source path.")
@@ -206,19 +209,30 @@ def tidy(
             type=click.Path(exists=True, file_okay=False, writable=True),
         )
 
-    options, config_file = get_album_photo_options(source_path)
+    source_paths = (
+        [
+            child
+            for child in Path(source_path).iterdir()
+            if (child / "config.json").exists()
+        ]
+        if is_parent
+        else [source_path]
+    )
 
-    while not options:
-        click.edit(filename=config_file, editor="code")
-        click.echo("Please edit the config.json file.")
-        click.pause(info="Press any key to continue...")
+    for source_path in source_paths:
         options, config_file = get_album_photo_options(source_path)
 
-    if default or album_folders:
-        handler.organize_album_folders(source_path, destination_path, options)
+        while not options:
+            click.edit(filename=config_file, editor="code")
+            click.echo("Please edit the config.json file.")
+            click.pause(info="Press any key to continue...")
+            options, config_file = get_album_photo_options(source_path)
 
-    if default or album_photos:
-        handler.organize_album_photos(source_path, options, settings.ignore)
+        if default or album_folders:
+            handler.organize_album_folders(source_path, destination_path, options)
+
+        if default or album_photos:
+            handler.organize_album_photos(source_path, options, settings.ignore)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,6 @@ from typing import Union
 from merls.config.album_photo import AlbumPhotoOptions
 from merls.config.ignore import Ignore
 from merls.entity.album_photo import NUMBER_PATTERNS
-from merls.entity.image import clear_image_exif
 from merls.handler.rollback import ROLLBACK_SEP, get_rollback_logger
 from merls.logger import logging
 
@@ -80,10 +79,4 @@ def organize_album_photos(
             if photo_name != photo.name:
                 new_photo = photo.with_name(photo_name)
                 rollback.info(f"{photo}{ROLLBACK_SEP}{new_photo}")
-                photo = photo.rename(new_photo)
-
-            try:
-                clear_image_exif(photo, photo.stem, options.album_prefix)
-            except RuntimeError as e:
-                log.error(e)
-                continue
+                photo.rename(new_photo)
