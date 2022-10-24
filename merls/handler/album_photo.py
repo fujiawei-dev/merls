@@ -1,4 +1,7 @@
 import contextlib
+import os
+import re
+import shutil
 from pathlib import Path
 from typing import Union
 
@@ -39,12 +42,17 @@ def organize_album_photos(
         else:
             raise ValueError(f"unknown photo mode: {options.photo_mode}")
 
-        numbers = set()
+        numbers = set(map(int, re.findall(r"\[(\d{4})]", "".join(os.listdir(album)))))
         latest_number = 0
+        folders = []
 
         for photo in album.iterdir():
+            if photo.stem.startswith(prefix_with_brackets + stem):
+                continue
+
             if not photo.is_file():
                 print(f"{photo.name} is not a file")
+                folders.append(photo)
                 continue
 
             if photo.stem in {"cover"}:
@@ -80,3 +88,12 @@ def organize_album_photos(
                 new_photo = photo.with_name(photo_name)
                 rollback.info(f"{photo}{ROLLBACK_SEP}{new_photo}")
                 photo.rename(new_photo)
+
+        for folder in folders:
+            for photo in folder.iterdir():
+                photo.rename(folder.parent / photo.name)
+
+            with contextlib.suppress(PermissionError):
+                folder.rmdir()
+
+            organize_album_photos(src, options, ignore)
